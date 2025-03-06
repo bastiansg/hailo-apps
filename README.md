@@ -1,1 +1,1 @@
-# hailo-apps (Sense HAT Display)
+# hailo-apps
