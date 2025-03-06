@@ -1,0 +1,13 @@
+**/__pycache__
+**/*.ipynb_checkpoints
+**/*.egg-info
+**/.cache
+
+build/
+resources/
+
+.secrets/*
+!.secrets/.gitkeep
+
+.vscode/*
+!.vscode/launch.json

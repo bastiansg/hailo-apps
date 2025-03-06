@@ -1,0 +1,45 @@
+{
+    "name": "hailo-apps",
+    "initializeCommand": "make core-build",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "hailo-apps-devcontainer",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.locator": "js",
+                "extensions.verifySignature": false,
+                "files.trimFinalNewlines": true,
+                "files.trimTrailingWhitespace": true,
+                "files.watcherExclude": {
+                    ".git/**": true,
+                    "./resources/**": true,
+                    "./notebooks/**": true
+                },
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.codeActionsOnSave": {
+                        "source.fixAll": "never"
+                    }
+                },
+                "[json]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "editor.formatOnSave": true,
+                "notebook.formatOnSave.enabled": true,
+                "notebook.output.scrolling": true,
+                "ruff.lineLength": 80
+            },
+            "extensions": [
+                "charliermarsh.ruff",
+                "esbenp.prettier-vscode",
+                "eamodio.gitlens",
+                "ms-toolsai.jupyter",
+                "ms-azuretools.vscode-docker",
+                "tamasfe.even-better-toml",
+                "christian-kohler.path-intellisense"
+            ]
+        }
+    },
+    "postCreateCommand": "bash .devcontainer/entrypoint.sh"
+}
