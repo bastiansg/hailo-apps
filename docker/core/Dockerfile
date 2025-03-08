@@ -20,7 +20,9 @@ RUN --mount=type=cache,target=/var/cache/apt \
     python${PYTHON_VERSION}-dev \
     python${PYTHON_VERSION}-distutils \
     python3-setuptools \
+    python3-sense-hat \
     python3-picamera2 \
+    python3-rpi.gpio \
     hailo-all\
     && apt-get autoremove -y \
     && apt-get clean \
