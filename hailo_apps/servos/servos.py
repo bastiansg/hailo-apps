@@ -1,10 +1,14 @@
 from adafruit_servokit import ServoKit
-from pydantic import BaseModel, NonNegativeInt, Field
+from pydantic import BaseModel, NonNegativeInt, field_validator
 
 
 class ServoAngles(BaseModel):
-    x: NonNegativeInt = Field(le=180, default=103)
-    y: NonNegativeInt = Field(le=180, default=80)
+    x: NonNegativeInt = 103
+    y: NonNegativeInt = 80
+
+    @field_validator("x", "y", mode="before")
+    def angle_validator(cls, value: int) -> int:
+        return max(0, min(value, 180))
 
 
 class Servos:
