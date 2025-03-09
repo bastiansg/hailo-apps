@@ -22,7 +22,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         )
 
         self.model = dg.load_model(
-            model_name="yolov8n_relu6_coco--640x640_quant_hailort_hailo8l_1",
+            model_name="yolov8n_relu6_face--640x640_quant_hailort_hailo8l_1",
             inference_host_address="@local",
             zoo_url="degirum/hailo",
         )

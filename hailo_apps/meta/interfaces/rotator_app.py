@@ -14,8 +14,8 @@ T = TypeVar("T", bound="RotatorApp")
 
 class RotatorParams(BaseModel):
     update_angle: PositiveInt = Field(le=5, default=5)
-    min_delta_x_angle: PositiveInt = Field(le=20, default=20)
-    min_delta_y_angle: PositiveInt = Field(le=40, default=40)
+    min_delta_x_angle: PositiveInt = Field(le=80, default=80)
+    min_delta_y_angle: PositiveInt = Field(le=100, default=100)
 
 
 class Centroid(BaseModel):
