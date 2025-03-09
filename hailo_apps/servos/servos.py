@@ -4,7 +4,7 @@ from pydantic import BaseModel, NonNegativeInt, Field
 
 class ServoAngles(BaseModel):
     x: NonNegativeInt = Field(le=180, default=103)
-    y: NonNegativeInt = Field(le=180, default=55)
+    y: NonNegativeInt = Field(le=180, default=80)
 
 
 class Servos:

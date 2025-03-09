@@ -1,1 +1,1 @@
-from .face_detector import FaceDetector  # noqa
+from .face_tracker import FaceTracker  # noqa

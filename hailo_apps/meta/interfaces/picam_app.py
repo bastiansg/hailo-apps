@@ -27,7 +27,9 @@ class PicamApp(ABC, Generic[T]):
         self,
         image_size: ImageSize,
     ):
+        self.image_size = image_size
         self.picam = self.get_picam(image_size=image_size)
+        self.is_active = True
 
     @staticmethod
     def get_picam(image_size: ImageSize) -> Picamera2:
@@ -50,7 +52,7 @@ class PicamApp(ABC, Generic[T]):
 
     def run(self) -> None:
         self.picam.start()
-        while True:
+        while self.is_active:
             np_image = self.picam.capture_array()
-            np_image = np_image[:, :, :3]  # Remove alpha channel
+            np_image = np_image[:, :, :3]  # Remove alpha channel.
             self.on_frame(np_image=np_image)
