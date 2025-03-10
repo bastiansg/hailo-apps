@@ -1,9 +1,8 @@
 pydantic==2.10.6
-fastapi[standard]==0.115.11
-uvicorn==0.34.0
-
 degirum_cli==0.2.0
 adafruit-circuitpython-servokit==1.3.19
 
 common @ git+https://git@github.com/aureka-team/common.git@v1.1.2
 sensehat_dsp @ git+https://github.com/bastiansg/sensehat-dsp.git@v1.0.7
+llm_experts @ git+https://git@github.com/aureka-team/llm-experts.git@v1.1.13
+agents @ git+https://github.com/aureka-team/agents.git@v1.0.7

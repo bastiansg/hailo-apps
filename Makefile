@@ -1,5 +1,5 @@
 include .env
-.PHONY: core-build api-build devcontainer-build
+.PHONY: core-build devcontainer-build
 
 
 core-build:
@@ -8,16 +8,6 @@ core-build:
 
 core-run:
 	docker compose run hailo-apps-core
-
-
-api-build: core-build
-	docker compose build hailo-apps-api
-
-api-run: api-build
-	docker compose run --rm hailo-apps-api
-
-api-up: api-build
-	docker compose up hailo-apps-api -d
 
 
 devcontainer-build: core-build
