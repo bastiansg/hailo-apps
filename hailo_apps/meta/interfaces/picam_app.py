@@ -26,8 +26,11 @@ class PicamApp(ABC, Generic[T]):
     def __init__(
         self,
         image_size: ImageSize,
+        rotation_180: bool = True,
     ):
         self.image_size = image_size
+        self.rotation_180 = rotation_180
+
         self.picam = self.get_picam(image_size=image_size)
         self.is_active = True
 
@@ -55,4 +58,8 @@ class PicamApp(ABC, Generic[T]):
         while self.is_active:
             np_image = self.picam.capture_array()
             np_image = np_image[:, :, :3]  # Remove alpha channel.
+
+            if self.rotation_180:
+                np_image = np_image[::-1, ::-1]  # 180-degree rotation.
+
             self.on_frame(np_image=np_image)
