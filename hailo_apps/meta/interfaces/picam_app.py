@@ -6,6 +6,8 @@ from typing import Self, TypeVar, Generic
 from picamera2 import Picamera2
 from pydantic import BaseModel, PositiveInt, model_validator
 
+from .hailo_app import HailoApp
+
 
 T = TypeVar("T", bound="PicamApp")
 
@@ -22,12 +24,17 @@ class ImageSize(BaseModel):
         raise ValueError("Aspect ratio must be 4:3")
 
 
-class PicamApp(ABC, Generic[T]):
+class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):
     def __init__(
         self,
+        model_url: str,
         image_size: ImageSize,
         rotation_180: bool = True,
     ):
+        super().__init__(
+            model_url=model_url,
+        )
+
         self.image_size = image_size
         self.rotation_180 = rotation_180
 

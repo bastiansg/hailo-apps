@@ -1,5 +1,4 @@
 import numpy as np
-import degirum as dg
 
 from common.logger import get_logger
 
@@ -14,17 +13,13 @@ class FaceTracker(RotatorApp["FaceTracker"]):
     def __init__(
         self,
         init_servo_angles: ServoAngles,
-        rotator_params=RotatorParams,
+        rotator_params: RotatorParams,
+        model_url: str = "https://hub.degirum.com/zoo/v1/public/models/degirum/hailo/yolov8n_relu6_face--640x640_quant_hailort_hailo8l_1",
     ):
         super().__init__(
+            model_url=model_url,
             init_servo_angles=init_servo_angles,
             rotator_params=rotator_params,
-        )
-
-        self.model = dg.load_model(
-            model_name="yolov8n_relu6_face--640x640_quant_hailort_hailo8l_1",
-            inference_host_address="@local",
-            zoo_url="degirum/hailo",
         )
 
     def get_centroid(self, np_image: np.ndarray) -> Centroid | None:

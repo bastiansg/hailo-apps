@@ -26,10 +26,14 @@ class Centroid(BaseModel):
 class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
     def __init__(
         self,
+        model_url: str,
         init_servo_angles: ServoAngles,
         rotator_params: RotatorParams,
     ):
-        super().__init__(image_size=ImageSize())
+        super().__init__(
+            model_url=model_url,
+            image_size=ImageSize(),
+        )
 
         self.servos = Servos(init_servo_angles=init_servo_angles)
         self.rotator_params = rotator_params
