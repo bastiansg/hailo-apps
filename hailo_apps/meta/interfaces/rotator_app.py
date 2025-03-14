@@ -27,12 +27,17 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
     def __init__(
         self,
         model_url: str,
+        image_size: ImageSize,
         init_servo_angles: ServoAngles,
         rotator_params: RotatorParams,
+        debug_mode: bool = False,
+        debug_path: str = "/resources/debug/images",
     ):
         super().__init__(
             model_url=model_url,
-            image_size=ImageSize(),
+            image_size=image_size,
+            debug_mode=debug_mode,
+            debug_path=debug_path,
         )
 
         self.servos = Servos(init_servo_angles=init_servo_angles)
