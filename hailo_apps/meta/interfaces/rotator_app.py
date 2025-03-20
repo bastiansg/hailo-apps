@@ -1,10 +1,11 @@
 import numpy as np
 
+from collections import deque
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic
 
 from hailo_apps.servos import ServoAngles, Servos
-from pydantic import BaseModel, PositiveInt, NonNegativeInt, Field
+from pydantic import BaseModel, PositiveInt, NonNegativeInt, Field, ConfigDict
 
 from .picam_app import PicamApp, ImageSize
 
@@ -23,6 +24,13 @@ class Centroid(BaseModel):
     y: NonNegativeInt
 
 
+class HistoryItem(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    np_image: np.ndarray
+    centroid: Centroid
+
+
 class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
     def __init__(
         self,
@@ -32,6 +40,7 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
         rotator_params: RotatorParams,
         debug_mode: bool = False,
         debug_path: str = "/resources/debug/images",
+        detection_history_length: int = 0,
     ):
         super().__init__(
             model_url=model_url,
@@ -45,6 +54,8 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
 
         self.x_angle = init_servo_angles.x
         self.y_angle = init_servo_angles.y
+
+        self.detection_history = deque(maxlen=detection_history_length)
 
     @abstractmethod
     def get_centroid(self, np_image: np.ndarray) -> Centroid | None:
@@ -95,3 +106,10 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
 
         self.x_angle = new_x_angle
         self.y_angle = new_y_angle
+
+        self.detection_history.append(
+            HistoryItem(
+                np_image=np_image,
+                centroid=centroid,
+            )
+        )

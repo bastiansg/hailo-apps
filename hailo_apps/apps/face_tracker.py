@@ -23,6 +23,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         model_url: str = "https://hub.degirum.com/zoo/v1/public/models/degirum/hailo/yolov8n_relu6_face--640x640_quant_hailort_hailo8l_1",
         debug_mode: bool = False,
         debug_path: str = "/resources/debug/images",
+        detection_history_length: int = 0,
     ):
         super().__init__(
             model_url=model_url,
@@ -31,6 +32,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
             rotator_params=rotator_params,
             debug_mode=debug_mode,
             debug_path=debug_path,
+            detection_history_length=detection_history_length,
         )
 
     def get_centroid(self, np_image: np.ndarray) -> Centroid | None:
