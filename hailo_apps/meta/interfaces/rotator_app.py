@@ -5,7 +5,14 @@ from abc import ABC, abstractmethod
 from typing import TypeVar, Generic
 
 from hailo_apps.servos import ServoAngles, Servos
-from pydantic import BaseModel, PositiveInt, NonNegativeInt, Field, ConfigDict
+from pydantic import (
+    BaseModel,
+    PositiveInt,
+    NonNegativeInt,
+    Field,
+    ConfigDict,
+    StrictInt,
+)
 
 from .picam_app import PicamApp, ImageSize
 
@@ -29,6 +36,8 @@ class HistoryItem(BaseModel):
 
     np_image: np.ndarray
     centroid: Centroid | None = None
+    x_delta: StrictInt | None = None
+    y_delta: StrictInt | None = None
 
 
 class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
@@ -40,7 +49,7 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
         rotator_params: RotatorParams,
         debug_mode: bool = False,
         debug_path: str = "/resources/debug/images",
-        detection_history_length: int = 0,
+        history_length: int = 0,
     ):
         super().__init__(
             model_url=model_url,
@@ -55,7 +64,7 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
         self.x_angle = init_servo_angles.x
         self.y_angle = init_servo_angles.y
 
-        self.detection_history = deque(maxlen=detection_history_length)
+        self.history = deque(maxlen=history_length)
 
     @abstractmethod
     def get_centroid(self, np_image: np.ndarray) -> Centroid | None:
@@ -80,14 +89,15 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
 
     def on_frame(self, np_image: np.ndarray) -> None:
         centroid = self.get_centroid(np_image=np_image)
-        self.detection_history.append(
-            HistoryItem(
-                np_image=np_image,
-                centroid=centroid,
-            )
-        )
 
         if centroid is None:
+            self.history.append(
+                HistoryItem(
+                    np_image=np_image,
+                    centroid=centroid,
+                )
+            )
+
             return
 
         new_x_angle = self.get_new_angle(
@@ -109,6 +119,15 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
                 x=new_x_angle,
                 y=new_y_angle,
             ),
+        )
+
+        self.history.append(
+            HistoryItem(
+                np_image=np_image,
+                centroid=centroid,
+                x_delta=self.x_angle - new_x_angle,
+                y_delta=self.y_angle - new_y_angle,
+            )
         )
 
         self.x_angle = new_x_angle

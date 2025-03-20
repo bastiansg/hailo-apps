@@ -23,7 +23,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         model_url: str = "https://hub.degirum.com/zoo/v1/public/models/degirum/hailo/yolov8n_relu6_face--640x640_quant_hailort_hailo8l_1",
         debug_mode: bool = False,
         debug_path: str = "/resources/debug/images",
-        detection_history_length: int = 0,
+        history_length: int = 0,
         min_score: float = 0.0,
     ):
         super().__init__(
@@ -33,7 +33,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
             rotator_params=rotator_params,
             debug_mode=debug_mode,
             debug_path=debug_path,
-            detection_history_length=detection_history_length,
+            history_length=history_length,
         )
 
         self.min_score = min_score
