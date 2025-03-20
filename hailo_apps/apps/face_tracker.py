@@ -24,6 +24,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         debug_mode: bool = False,
         debug_path: str = "/resources/debug/images",
         detection_history_length: int = 0,
+        min_score: float = 0.0,
     ):
         super().__init__(
             model_url=model_url,
@@ -35,13 +36,19 @@ class FaceTracker(RotatorApp["FaceTracker"]):
             detection_history_length=detection_history_length,
         )
 
+        self.min_score = min_score
+
     def get_centroid(self, np_image: np.ndarray) -> Centroid | None:
         detection = self.model(np_image)
         results = detection.results
         if not len(results):
             return
 
-        x1, y1, x2, y2 = results[0]["bbox"]  # Only use the first result.
+        first_result = results[0]  # Only use the first result.
+        if first_result["score"] < self.min_score:
+            return
+
+        x1, y1, x2, y2 = first_result["bbox"]
         centroid = Centroid(
             x=int((x1 + x2) / 2),
             y=int((y1 + y2) / 2),

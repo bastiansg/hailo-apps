@@ -28,7 +28,7 @@ class HistoryItem(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     np_image: np.ndarray
-    centroid: Centroid
+    centroid: Centroid | None = None
 
 
 class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
@@ -80,6 +80,13 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
 
     def on_frame(self, np_image: np.ndarray) -> None:
         centroid = self.get_centroid(np_image=np_image)
+        self.detection_history.append(
+            HistoryItem(
+                np_image=np_image,
+                centroid=centroid,
+            )
+        )
+
         if centroid is None:
             return
 
@@ -106,10 +113,3 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
 
         self.x_angle = new_x_angle
         self.y_angle = new_y_angle
-
-        self.detection_history.append(
-            HistoryItem(
-                np_image=np_image,
-                centroid=centroid,
-            )
-        )
