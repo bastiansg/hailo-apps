@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     python3-setuptools \
     python3-picamera2 \
     python3-rpi.gpio \
-    hailo-all\
+    hailo-all \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/tmp/* /var/lib/apt/lists/*
