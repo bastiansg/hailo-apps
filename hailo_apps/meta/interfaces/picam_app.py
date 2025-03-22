@@ -97,6 +97,7 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):
             self.on_frame(np_image=np_image)
 
         self.picam.stop()
+        self.mutex.release()
 
     def stop(self) -> None:
         self.is_active = False
