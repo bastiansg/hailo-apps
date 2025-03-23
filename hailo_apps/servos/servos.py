@@ -12,9 +12,10 @@ class ServoAngles(BaseModel):
 
 
 class Servos:
-    def __init__(self, init_servo_angles: ServoAngles):
+    def __init__(self, init_servo_angles: ServoAngles | None = None):
         self.servo_kit = ServoKit(channels=16)
-        self.set_angles(servo_angles=init_servo_angles)
+        if init_servo_angles is not None:
+            self.set_angles(servo_angles=init_servo_angles)
 
     def set_angles(self, servo_angles: ServoAngles) -> None:
         self.servo_kit.servo[0].angle = servo_angles.x
