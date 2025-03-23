@@ -57,6 +57,10 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):
         self.mutex = Lock()
         self.is_active = False
 
+    def __del__(self):
+        self.picam.stop()
+        self.picam.close()
+
     @staticmethod
     def get_picam(image_size: ImageSize) -> Picamera2:
         picam = Picamera2()
