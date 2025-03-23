@@ -95,6 +95,8 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
                 HistoryItem(
                     np_image=np_image,
                     centroid=centroid,
+                    x_delta=self.rotator_params.update_angle,
+                    y_delta=self.rotator_params.update_angle,
                 )
             )
 
