@@ -36,8 +36,8 @@ class HistoryItem(BaseModel):
 
     np_image: np.ndarray
     centroid: Centroid | None = None
-    x_delta: StrictInt | None = None
-    y_delta: StrictInt | None = None
+    x_delta: StrictInt = 0
+    y_delta: StrictInt = 0
 
 
 class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
