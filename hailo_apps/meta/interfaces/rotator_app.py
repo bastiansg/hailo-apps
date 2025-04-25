@@ -24,6 +24,10 @@ class RotatorParams(BaseModel):
     update_angle: PositiveInt = Field(le=5, default=5)
     min_delta_x_angle: PositiveInt = Field(le=80, default=80)
     min_delta_y_angle: PositiveInt = Field(le=100, default=100)
+    min_x_angle: NonNegativeInt = Field(lt=180, default=0)
+    max_x_angle: NonNegativeInt = Field(le=180, default=180)
+    min_y_angle: NonNegativeInt = Field(lt=180, default=20)
+    max_y_angle: NonNegativeInt = Field(le=180, default=180)
 
 
 class Centroid(BaseModel):
@@ -76,16 +80,20 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
         axis_length: int,
         centroid_coord: int,
         min_delta_angle: int,
+        min_angle: int,
+        max_angle: int,
     ) -> int:
         axis_delta = (axis_length // 2) - centroid_coord
         if abs(axis_delta) <= min_delta_angle:
             return axis_angle
 
-        return (
+        new_angle = (
             (axis_angle + self.rotator_params.update_angle)
             if axis_delta > 0
             else (axis_angle - self.rotator_params.update_angle)
         )
+
+        return max(min_angle, min(new_angle, max_angle))
 
     def on_frame(self, np_image: np.ndarray) -> None:
         centroid = self.get_centroid(np_image=np_image)
@@ -107,6 +115,8 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
             axis_length=self.image_size.width,
             centroid_coord=centroid.x,
             min_delta_angle=self.rotator_params.min_delta_x_angle,
+            min_angle=self.rotator_params.min_x_angle,
+            max_angle=self.rotator_params.max_x_angle,
         )
 
         new_y_angle = self.get_new_angle(
@@ -114,6 +124,8 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
             axis_length=self.image_size.height,
             centroid_coord=centroid.y,
             min_delta_angle=self.rotator_params.min_delta_y_angle,
+            min_angle=self.rotator_params.min_y_angle,
+            max_angle=self.rotator_params.max_y_angle,
         )
 
         self.servos.set_angles(
