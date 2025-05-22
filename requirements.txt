@@ -1,6 +1,6 @@
-pydantic>=2.11.3
+pydantic>=2.11.4
 lgpio==0.2.2.0
 degirum_cli==0.2.0
-adafruit-circuitpython-servokit==1.3.19
+adafruit-circuitpython-servokit==1.3.20
 
-common @ git+https://git@github.com/aureka-team/common.git@v1.1.6
+common @ git+https://git@github.com/aureka-team/common.git@v1.1.8

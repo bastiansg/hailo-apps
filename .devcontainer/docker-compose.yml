@@ -1,6 +1,5 @@
 services:
     hailo-apps-devcontainer:
-        network_mode: host
         image: hailo-apps-devcontainer
         container_name: hailo-apps-devcontainer
         build:
@@ -10,9 +9,13 @@ services:
             - ..:/workspace:cached
             - ../resources/:/resources
             - /run/udev:/run/udev:ro
-        env_file:
-            - ../.env
-            - ../.secrets/.env
         privileged: true
         # This keeps the devcontainer running.
         entrypoint: ["tail", "-f", "/dev/null"]
+        networks:
+            - hailo-apps
+
+networks:
+    hailo-apps:
+        name: hailo-apps
+        driver: bridge

@@ -2,16 +2,16 @@ services:
     hailo-apps-core:
         image: hailo-apps-core
         container_name: hailo-apps-core
-        network_mode: host
         build:
             context: .
             dockerfile: ./docker/core/Dockerfile
-            args:
-                - PYTHON_VERSION
-                - UV_VERSION
         volumes:
             - $PWD/resources:/resources
-        env_file:
-            - .env
-            - .secrets/.env
         privileged: true
+        networks:
+            - hailo-apps
+
+networks:
+    hailo-apps:
+        name: hailo-apps
+        driver: bridge

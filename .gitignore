@@ -5,9 +5,3 @@
 
 build/
 resources/
-
-.secrets/*
-!.secrets/.gitkeep
-
-.vscode/*
-!.vscode/launch.json

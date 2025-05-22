@@ -1,14 +1,17 @@
-ARG UV_VERSION
+ARG UV_VERSION=0.7.6
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv_source
 
 FROM debian:bookworm-slim
+
+ENV UV_SYSTEM_PYTHON=1
+ENV HAILORT_LOGGER_PATH=NONE
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gpg \
     && curl -fsSL https://archive.raspberrypi.org/debian/raspberrypi.gpg.key | gpg --dearmor -o /usr/share/keyrings/raspberrypi-archive-keyring.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/raspberrypi-archive-keyring.gpg] http://archive.raspberrypi.org/debian bookworm main" > /etc/apt/sources.list.d/raspi.list \
     && apt-get update
 
-ARG PYTHON_VERSION
+ARG PYTHON_VERSION=3.11
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=target=/var/cache/apt,type=cache,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -36,10 +39,8 @@ COPY --from=uv_source /uv /uvx /bin/
 WORKDIR /tmp
 
 COPY ./requirements.txt requirements.txt
-RUN --mount=type=ssh \
-    mkdir -p -m 0600 ~/.ssh \
-    && ssh-keyscan github.com >> ~/.ssh/known_hosts \
-    && uv pip install -r requirements.txt --system
+RUN --mount=type=cache,target=/root/.cache \
+    uv pip install -r requirements.txt
 
 RUN rm -rf /tmp/*
 WORKDIR /root
