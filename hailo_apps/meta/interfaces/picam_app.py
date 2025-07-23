@@ -1,6 +1,7 @@
 import numpy as np
 
 from PIL import Image
+from time import sleep
 from threading import Lock, Event
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic
@@ -94,3 +95,4 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):
 
     def stop(self) -> None:
         self.stop_event.set()
+        sleep(0.01)
