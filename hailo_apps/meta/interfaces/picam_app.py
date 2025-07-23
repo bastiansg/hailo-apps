@@ -95,4 +95,4 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):
 
     def stop(self) -> None:
         self.stop_event.set()
-        sleep(0.01)
+        sleep(0.1)
