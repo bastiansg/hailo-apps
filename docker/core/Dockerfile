@@ -1,10 +1,7 @@
-ARG UV_VERSION=0.7.20
+ARG UV_VERSION=0.7.22
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv_source
 
 FROM debian:bookworm-slim
-
-ENV UV_SYSTEM_PYTHON=1
-ENV HAILORT_LOGGER_PATH=NONE
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gpg \
     && curl -fsSL https://archive.raspberrypi.org/debian/raspberrypi.gpg.key | gpg --dearmor -o /usr/share/keyrings/raspberrypi-archive-keyring.gpg \
@@ -34,6 +31,7 @@ RUN rm /usr/lib/python${PYTHON_VERSION}/EXTERNALLY-MANAGED
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_VERSION} 1 \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
 
+ENV UV_SYSTEM_PYTHON=1
 COPY --from=uv_source /uv /uvx /bin/
 
 WORKDIR /tmp
@@ -44,3 +42,5 @@ RUN --mount=type=cache,target=/root/.cache \
 
 RUN rm -rf /tmp/*
 WORKDIR /root
+
+ENV HAILORT_LOGGER_PATH=NONE
