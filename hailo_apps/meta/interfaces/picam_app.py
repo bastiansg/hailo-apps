@@ -23,7 +23,7 @@ class ImageSize(BaseModel):
     height: PositiveInt = 640
 
 
-class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):
+class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
     def __init__(
         self,
         model_url: str,
@@ -89,7 +89,7 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):
                     pil_image.save(self.debug_image_path)
                     break
 
-                self.on_frame(np_image=np_image)
+                self.on_frame(np_image=np_image)  # type: ignore
 
             self.picam.stop()
 

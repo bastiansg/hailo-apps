@@ -44,7 +44,7 @@ class HistoryItem(BaseModel):
     y_delta: StrictInt = 0
 
 
-class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):
+class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):  # type: ignore
     def __init__(
         self,
         model_url: str,

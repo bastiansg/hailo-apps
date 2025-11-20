@@ -9,7 +9,7 @@ from typing import TypeVar, Generic
 T = TypeVar("T", bound="HailoApp")
 
 
-class HailoApp(Generic[T]):
+class HailoApp(Generic[T]):  # type: ignore
     def __init__(
         self,
         model_url: str,

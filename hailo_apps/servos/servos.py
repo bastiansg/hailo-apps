@@ -4,7 +4,7 @@ from pydantic import BaseModel, NonNegativeInt, field_validator
 
 class ServoAngles(BaseModel):
     x: NonNegativeInt = 103
-    y: NonNegativeInt = 80
+    y: NonNegativeInt = 30
 
     @field_validator("x", "y", mode="before")
     def angle_validator(cls, value: int) -> int:
