@@ -1,4 +1,4 @@
-ARG UV_VERSION=0.9.25
+ARG UV_VERSION=0.10.10
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv_source
 
 FROM debian:bookworm-slim
@@ -40,6 +40,9 @@ COPY uv.toml .
 COPY ./requirements.txt requirements.txt
 RUN --mount=type=cache,target=/root/.cache \
     uv pip install -r requirements.txt
+
+ARG DEGIRUM_CLOUD_TOKEN
+RUN degirum token install "$DEGIRUM_CLOUD_TOKEN"
 
 RUN rm -rf /tmp/*
 WORKDIR /root

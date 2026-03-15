@@ -5,6 +5,8 @@ services:
         build:
             context: .
             dockerfile: ./docker/core/Dockerfile
+            args:
+                DEGIRUM_CLOUD_TOKEN: ${DEGIRUM_CLOUD_TOKEN}
         volumes:
             - $PWD/resources:/resources
         privileged: true
