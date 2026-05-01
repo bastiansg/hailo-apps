@@ -1,9 +1,8 @@
 import os
 import pooch
 
-import degirum as dg
-
-from typing import TypeVar, Generic
+from typing import Generic, TypeVar
+from .hailo_detection_model import HailoDetectionModel
 
 
 T = TypeVar("T", bound="HailoApp")
@@ -20,10 +19,10 @@ class HailoApp(Generic[T]):  # type: ignore
             model_download_path=model_download_path,
         )
 
-        self.model = dg.load_model(
-            model_name=os.path.basename(model_url),
-            inference_host_address="@local",
-            zoo_url=model_path,
+        model_name = os.path.basename(model_url)
+        self.model = HailoDetectionModel(
+            model_dir=model_path,
+            model_name=model_name,
         )
 
     @staticmethod
