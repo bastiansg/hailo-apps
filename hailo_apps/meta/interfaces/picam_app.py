@@ -2,6 +2,7 @@ import numpy as np
 
 from PIL import Image
 from time import sleep
+from pathlib import Path
 from threading import Lock, Event
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic
@@ -9,9 +10,7 @@ from typing import TypeVar, Generic
 from picamera2 import Picamera2
 from pydantic import BaseModel, PositiveInt
 
-from common.utils.path import create_path
-from common.utils.threading import threaded
-
+from .utils import threaded
 from .hailo_app import HailoApp
 
 
@@ -40,7 +39,7 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
         self.rotation_180 = rotation_180
         self.debug_mode = debug_mode
 
-        create_path(path=debug_path)
+        Path(debug_path).mkdir(parents=True, exist_ok=True)
         self.debug_image_path = f"{debug_path}/debug-image.jpg"
 
         self.picam = self.get_picam(image_size=image_size)

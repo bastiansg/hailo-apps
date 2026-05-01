@@ -1,6 +1,5 @@
 {
     "name": "hailo-apps",
-    "initializeCommand": "make core-build",
     "dockerComposeFile": "docker-compose.yml",
     "service": "hailo-apps-devcontainer",
     "workspaceFolder": "/workspace",

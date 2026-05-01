@@ -1,7 +1,5 @@
 import numpy as np
 
-from common.logger import get_logger
-
 from hailo_apps.servos import ServoAngles
 from hailo_apps.meta.interfaces import (
     RotatorApp,
@@ -9,9 +7,6 @@ from hailo_apps.meta.interfaces import (
     Centroid,
     ImageSize,
 )
-
-
-logger = get_logger(__name__)
 
 
 BASE_MODEL_URL = "https://hub.degirum.com/zoo/v1/public/models/degirum/hailo"

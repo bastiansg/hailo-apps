@@ -1,4 +1,0 @@
-[pip]
-find-links = [
-    "https://github.com/aureka-team/common/releases/expanded_assets/index",
-]

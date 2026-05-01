@@ -5,6 +5,8 @@ services:
         build:
             context: ..
             dockerfile: .devcontainer/Dockerfile
+            args:
+                DEGIRUM_CLOUD_TOKEN: ${DEGIRUM_CLOUD_TOKEN}
         volumes:
             - ..:/workspace:cached
             - ../resources/:/resources

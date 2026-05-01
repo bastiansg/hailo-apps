@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 requires-python = ">=3.11"
 name = "hailo_apps"
 dynamic = ["version", "dependencies"]
-description = "Halio Apps"
+description = "Hailo Apps"
 readme = "README.md"
 authors = [{ name = "Bas", email = "bastiansg.bas@gmail.com" }]
 license = { file = "LICENSE" }
@@ -23,6 +23,3 @@ include = ["hailo_apps"]
 dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools_scm]
-
-[tool.setuptools.package-data]
-"hailo_apps" = ["conf/*"]
