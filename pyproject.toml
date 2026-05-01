@@ -16,8 +16,12 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 
+[tool.setuptools]
+package-dir = { "" = "src" }
+
 [tool.setuptools.packages.find]
-include = ["hailo_apps"]
+where = ["src"]
+include = ["hailo_apps*"]
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
