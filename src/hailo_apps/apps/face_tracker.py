@@ -9,7 +9,7 @@ from hailo_apps.meta.interfaces import (
 )
 
 
-BASE_MODEL_URL = "https://hub.degirum.com/zoo/v1/public/models/degirum/hailo"
+BASE_MODEL_URL = "/usr/share/hailo-models"
 
 
 class FaceTracker(RotatorApp["FaceTracker"]):
@@ -18,7 +18,8 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         init_servo_angles: ServoAngles,
         rotator_params: RotatorParams,
         image_size: ImageSize,
-        model_name: str = "yolov8n_relu6_face--640x640_quant_hailort_hailo8l_1",
+        # model_name: str = "scrfd_10g_h8l.hef",
+        model_name: str = "scrfd_2.5g_h8l.hef",
         debug_mode: bool = False,
         debug_path: str = "/resources/debug/images",
         history_length: int = 0,
