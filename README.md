@@ -1,7 +1,15 @@
 # hailo-apps
 
-`hailo_apps` runs Hailo detection models on Raspberry Pi camera frames and uses
-the results to control pan-and-tilt servos.
+`hailo_apps` runs detection models with
+[Hailo](https://hailo.ai/) edge AI processors on Raspberry Pi camera frames and
+uses the results to control pan-and-tilt servos. Hailo designs accelerators for
+running neural-network inference locally on edge devices.
+
+This project uses the
+[Raspberry Pi AI Kit](https://www.raspberrypi.com/products/ai-kit/), which
+connects a Hailo-8L accelerator to a Raspberry Pi 5 over PCIe. The Hailo-8L is
+a 13 TOPS neural-network inference chip that processes compatible AI models
+without using the Raspberry Pi CPU for the inference workload.
 
 ## Used by P.O.R.
 
