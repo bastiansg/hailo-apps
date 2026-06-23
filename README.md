@@ -3,6 +3,13 @@
 `hailo_apps` runs Hailo detection models on Raspberry Pi camera frames and uses
 the results to control pan-and-tilt servos.
 
+## Used by P.O.R.
+
+`hailo_apps` is a dependency of
+[P.O.R. (Pop Oracle Robot)](https://github.com/bastiansg/por). It provides
+P.O.R. with camera capture, Hailo-powered face detection, face tracking, and
+pan-and-tilt control.
+
 ## Components
 
 The application stack builds from Hailo inference to camera capture and
