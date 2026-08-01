@@ -3,7 +3,10 @@ import termios
 import tty
 from collections.abc import Generator
 from contextlib import contextmanager
+from datetime import UTC, datetime
+from pathlib import Path
 
+from PIL import Image
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
@@ -11,6 +14,12 @@ from rich.panel import Panel
 from hailo_apps.apps import FaceTracker
 from hailo_apps.meta.interfaces import ImageSize, RotatorParams
 from hailo_apps.servos import ServoAngles
+
+CAPTURES_DIRECTORY = Path("./resources/captures")
+CAPTURE_SIZE = ImageSize(
+    width=2048,
+    height=2048,
+)
 
 console = Console()
 
@@ -61,10 +70,11 @@ def main() -> None:
         init_servo_angles=ServoAngles(),
         rotator_params=RotatorParams(),
         image_size=ImageSize(
-            width=2048,
-            height=2048,
+            width=640,
+            height=640,
         ),
-        history_length=0,
+        capture_size=CAPTURE_SIZE,
+        history_length=1,
     )
 
     try:
@@ -80,8 +90,27 @@ def main() -> None:
         )
 
         face_tracker.stop()
-        with face_tracker.mutex:
-            pass
+
+    if not face_tracker.history:
+        raise RuntimeError("face tracker did not capture a final image")
+
+    final_image = face_tracker.history[-1].np_image
+    image_height, image_width = final_image.shape[:2]
+    if image_width != CAPTURE_SIZE.width or image_height != CAPTURE_SIZE.height:
+        raise RuntimeError(
+            "final image has unexpected resolution: "
+            f"{image_width}x{image_height}"
+        )
+
+    CAPTURES_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    captured_at = datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
+    capture_path = CAPTURES_DIRECTORY / f"{captured_at}.jpg"
+    Image.fromarray(final_image).save(capture_path)
+
+    console.print(
+        "[dim bright_magenta]└──>[/dim bright_magenta] "
+        f"[dim white]IMAGE SAVED :: {capture_path}[/dim white]"
+    )
 
 
 if __name__ == "__main__":

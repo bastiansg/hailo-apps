@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from threading import Event, Lock
-from time import sleep
+from threading import Event, Lock, Thread
 from typing import Generic, TypeVar
 
 import numpy as np
@@ -10,10 +9,19 @@ from picamera2 import Picamera2
 from PIL import Image
 from pydantic import BaseModel, PositiveInt
 
+from hailo_apps.config import config
+
 from .hailo_app import HailoApp
-from .utils import threaded
 
 T = TypeVar("T", bound="PicamApp")
+
+CAMERA_CONTROLS = {
+    "AfMode": controls.AfModeEnum.Continuous,
+    "AfRange": controls.AfRangeEnum.Normal,
+    "AfSpeed": controls.AfSpeedEnum.Normal,
+    "AeMeteringMode": controls.AeMeteringModeEnum.CentreWeighted,
+    "AwbMode": controls.AwbModeEnum.Auto,
+}
 
 
 class ImageSize(BaseModel):
@@ -43,6 +51,7 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
 
         self.mutex = Lock()
         self.stop_event = Event()
+        self.thread: Thread | None = None
 
     def __del__(self) -> None:
         picam = getattr(self, "picam", None)
@@ -55,9 +64,9 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
     @staticmethod
     def get_picam(image_size: ImageSize) -> Picamera2:
         picam = Picamera2()
-        config = picam.create_video_configuration(
+        camera_configuration = picam.create_video_configuration(
             main={
-                "format": "RGB888",
+                "format": config.image_format,
                 "size": (
                     image_size.width,
                     image_size.height,
@@ -70,40 +79,49 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
             buffer_count=1,
         )
 
-        picam.configure(config)
+        picam.configure(camera_configuration)
         return picam
 
     @abstractmethod
     def on_frame(self, np_image: np.ndarray) -> None:
         pass
 
-    @threaded
     def run(self) -> None:
+        if self.thread is not None and self.thread.is_alive():
+            raise RuntimeError("camera is already running")
+
+        self.stop_event.clear()
+        self.thread = Thread(target=self._run, daemon=True)
+        self.thread.start()
+
+    def _run(self) -> None:
         with self.mutex:
-            self.stop_event.clear()
             self.picam.start()
-            self.picam.set_controls(
-                {
-                    "AfMode": controls.AfModeEnum.Continuous,
-                    "AfRange": controls.AfRangeEnum.Normal,
-                    "AfSpeed": controls.AfSpeedEnum.Normal,
-                    "AeMeteringMode": controls.AeMeteringModeEnum.CentreWeighted,
-                    "AwbMode": controls.AwbModeEnum.Auto,
-                }
-            )
+            self.picam.set_controls(CAMERA_CONTROLS)
 
-            while not self.stop_event.is_set():
-                np_image = self.picam.capture_array()
+            try:
+                while not self.stop_event.is_set():
+                    np_image = self.picam.capture_array()
 
-                if self.debug_mode:
-                    pil_image = Image.fromarray(np_image)
-                    pil_image.save(self.debug_image_path)
-                    break
+                    if self.debug_mode:
+                        pil_image = Image.fromarray(np_image)
+                        pil_image.save(self.debug_image_path)
+                        break
 
-                self.on_frame(np_image=np_image)  # type: ignore
+                    self.on_frame(np_image=np_image)  # type: ignore
 
-            self.picam.stop()
+                self.before_stop()
+            finally:
+                self.picam.stop()
+
+    def before_stop(self) -> None:
+        pass
 
     def stop(self) -> None:
         self.stop_event.set()
-        sleep(0.1)
+        thread = self.thread
+        if thread is None:
+            return
+
+        thread.join()
+        self.thread = None
