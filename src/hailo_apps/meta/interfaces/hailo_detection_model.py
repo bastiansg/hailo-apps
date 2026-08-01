@@ -1,23 +1,21 @@
-import numpy as np
-
-from typing import Any
-from pathlib import Path
-
-from contextlib import ExitStack
 from collections.abc import Iterator
+from contextlib import ExitStack
+from pathlib import Path
+from typing import Any
 
-from PIL import Image
-from pydantic import BaseModel, ConfigDict
+import numpy as np
 from hailo_platform import (
+    HEF,
     ConfigureParams,
     FormatType,
-    HEF,
     HailoStreamInterface,
     InferVStreams,
     InputVStreamParams,
     OutputVStreamParams,
     VDevice,
 )
+from PIL import Image
+from pydantic import BaseModel, ConfigDict
 
 
 class Letterbox(BaseModel):
@@ -188,7 +186,7 @@ class HailoDetectionModel:
         )
 
     def preprocess(self, np_image: np.ndarray) -> tuple[np.ndarray, Letterbox]:
-        input_image = Image.fromarray(np_image.astype(np.uint8))
+        input_image = Image.fromarray(np.asarray(np_image, dtype=np.uint8))
         input_width, input_height = input_image.size
 
         if self.preprocess_config.get("InputPadMethod") != "letterbox":

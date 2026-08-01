@@ -1,22 +1,21 @@
-import numpy as np
-
-from collections import deque
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic
+from collections import deque
+from typing import Generic, TypeVar
 
-from hailo_apps.servos import ServoAngles, Servos
+import numpy as np
 from pydantic import (
     BaseModel,
-    PositiveInt,
-    NonNegativeInt,
-    Field,
     ConfigDict,
+    Field,
+    NonNegativeInt,
+    PositiveInt,
     StrictInt,
     model_validator,
 )
 
-from .picam_app import PicamApp, ImageSize
+from hailo_apps.servos import ServoAngles, Servos
 
+from .picam_app import ImageSize, PicamApp
 
 T = TypeVar("T", bound="RotatorApp")
 

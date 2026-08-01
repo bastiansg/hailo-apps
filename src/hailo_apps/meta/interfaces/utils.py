@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from threading import Thread
-from typing import TypeVar, Callable, Any
-
+from typing import Any, TypeVar
 
 F = TypeVar("F", bound=Callable[..., None])
 

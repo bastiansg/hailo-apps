@@ -12,21 +12,19 @@
                 "files.trimTrailingWhitespace": true,
                 "files.watcherExclude": {
                     ".git/**": true,
-                    "./resources/**": true,
-                    "./notebooks/**": true
+                    "./resources/**": true
                 },
                 "[python]": {
                     "editor.defaultFormatter": "charliermarsh.ruff",
                     "editor.codeActionsOnSave": {
-                        "source.fixAll": "never"
+                        "source.fixAll.ruff": "explicit",
+                        "source.organizeImports.ruff": "explicit"
                     }
                 },
                 "[json]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },
                 "editor.formatOnSave": true,
-                "notebook.formatOnSave.enabled": true,
-                "notebook.output.scrolling": true,
                 "ruff.lineLength": 80
             },
             "extensions": [

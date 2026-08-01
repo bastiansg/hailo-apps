@@ -1,13 +1,12 @@
 import numpy as np
 
-from hailo_apps.servos import ServoAngles
 from hailo_apps.meta.interfaces import (
-    RotatorApp,
-    RotatorParams,
     Centroid,
     ImageSize,
+    RotatorApp,
+    RotatorParams,
 )
-
+from hailo_apps.servos import ServoAngles
 
 BASE_MODEL_URL = "/usr/share/hailo-models"
 

@@ -1,18 +1,17 @@
-import numpy as np
-
-from PIL import Image
-from time import sleep
-from pathlib import Path
-from threading import Lock, Event
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic
+from pathlib import Path
+from threading import Event, Lock
+from time import sleep
+from typing import Generic, TypeVar
 
+import numpy as np
+from libcamera import Transform, controls
 from picamera2 import Picamera2
+from PIL import Image
 from pydantic import BaseModel, PositiveInt
 
-from .utils import threaded
 from .hailo_app import HailoApp
-
+from .utils import threaded
 
 T = TypeVar("T", bound="PicamApp")
 
@@ -27,7 +26,6 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
         self,
         model_url: str,
         image_size: ImageSize,
-        rotation_180: bool = True,
         debug_mode: bool = False,
         debug_path: str = "/resources/debug/images",
     ):
@@ -36,7 +34,6 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
         )
 
         self.image_size = image_size
-        self.rotation_180 = rotation_180
         self.debug_mode = debug_mode
 
         Path(debug_path).mkdir(parents=True, exist_ok=True)
@@ -47,20 +44,30 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
         self.mutex = Lock()
         self.stop_event = Event()
 
-    def __del__(self):
-        self.picam.stop()
-        self.picam.close()
+    def __del__(self) -> None:
+        picam = getattr(self, "picam", None)
+        if picam is None:
+            return
+
+        picam.stop()
+        picam.close()
 
     @staticmethod
     def get_picam(image_size: ImageSize) -> Picamera2:
         picam = Picamera2()
         config = picam.create_video_configuration(
             main={
+                "format": "RGB888",
                 "size": (
                     image_size.width,
                     image_size.height,
                 ),
-            }
+            },
+            transform=Transform(
+                hflip=True,
+                vflip=True,
+            ),
+            buffer_count=1,
         )
 
         picam.configure(config)
@@ -75,13 +82,18 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
         with self.mutex:
             self.stop_event.clear()
             self.picam.start()
+            self.picam.set_controls(
+                {
+                    "AfMode": controls.AfModeEnum.Continuous,
+                    "AfRange": controls.AfRangeEnum.Normal,
+                    "AfSpeed": controls.AfSpeedEnum.Normal,
+                    "AeMeteringMode": controls.AeMeteringModeEnum.CentreWeighted,
+                    "AwbMode": controls.AwbModeEnum.Auto,
+                }
+            )
 
             while not self.stop_event.is_set():
                 np_image = self.picam.capture_array()
-                np_image = np_image[:, :, :3]  # Remove alpha channel.
-
-                if self.rotation_180:
-                    np_image = np_image[::-1, ::-1]  # 180-degree rotation.
 
                 if self.debug_mode:
                     pil_image = Image.fromarray(np_image)

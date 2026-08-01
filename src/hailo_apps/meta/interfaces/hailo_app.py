@@ -1,11 +1,10 @@
 import os
+from typing import Generic, TypeVar
+from urllib.parse import urlparse
+
 import pooch
 
-from urllib.parse import urlparse
-from typing import Generic, TypeVar
-
 from .hailo_detection_model import HailoDetectionModel
-
 
 HAILO_MODEL_URLS = {
     "scrfd_10g_h8l.hef": (

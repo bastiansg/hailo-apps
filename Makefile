@@ -1,8 +1,16 @@
-.PHONY: devcontainer-build
+.PHONY: devcontainer-build face-tracker servos
 
 
 devcontainer-build:
 	docker compose -f .devcontainer/docker-compose.yml build hailo-apps-devcontainer
+
+
+face-tracker: devcontainer-build
+	docker compose -f .devcontainer/docker-compose.yml run --rm --entrypoint="env PYTHONPATH=/workspace/src python -m hailo_apps.scripts.face_tracker" hailo-apps-devcontainer
+
+
+servos: devcontainer-build
+	docker compose -f .devcontainer/docker-compose.yml run --rm --entrypoint="env PYTHONPATH=/workspace/src python -m hailo_apps.scripts.servos" hailo-apps-devcontainer
 
 
 camera-memory-free:

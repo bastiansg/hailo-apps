@@ -1,4 +1,4 @@
-ARG UV_VERSION=0.11.19
+ARG UV_VERSION=0.12.1
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv_source
 
 FROM debian:bookworm-slim
@@ -43,9 +43,6 @@ WORKDIR /tmp
 COPY ./requirements.txt requirements.txt
 RUN --mount=type=cache,target=/root/.cache \
     uv pip install -r requirements.txt
-
-COPY .devcontainer/requirements.txt .
-RUN uv pip install -r requirements.txt
 
 RUN rm -rf /tmp/*
 WORKDIR /workspace
