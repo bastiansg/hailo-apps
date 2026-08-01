@@ -76,6 +76,7 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
                 hflip=True,
                 vflip=True,
             ),
+            controls=CAMERA_CONTROLS,
             buffer_count=1,
         )
 
@@ -97,7 +98,6 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
     def _run(self) -> None:
         with self.mutex:
             self.picam.start()
-            self.picam.set_controls(CAMERA_CONTROLS)
 
             try:
                 while not self.stop_event.is_set():

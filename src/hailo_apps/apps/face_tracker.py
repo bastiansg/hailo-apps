@@ -89,7 +89,6 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         np_image = self.picam.switch_mode_and_capture_array(
             capture_configuration,
             "main",
-            delay=3,
         )
 
         self.history.append(
