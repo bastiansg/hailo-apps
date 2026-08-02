@@ -10,7 +10,6 @@ from pydantic import (
     NonNegativeInt,
     PositiveInt,
     StrictInt,
-    model_validator,
 )
 
 from hailo_apps.servos import ServoAngles, Servos
@@ -30,17 +29,6 @@ class RotatorParams(BaseModel):
     max_x_angle: NonNegativeInt = Field(le=180, default=180)
     min_y_angle: NonNegativeInt = Field(lt=180, default=20)
     max_y_angle: NonNegativeInt = Field(le=180, default=180)
-    y_quadrant_count: PositiveInt = 10
-    y_target_quadrant: NonNegativeInt = 6
-
-    @model_validator(mode="after")
-    def validate_y_target_quadrant(self) -> "RotatorParams":
-        if self.y_target_quadrant > self.y_quadrant_count:
-            raise ValueError(
-                "y_target_quadrant must not exceed y_quadrant_count"
-            )
-
-        return self
 
 
 class Centroid(BaseModel):
@@ -95,12 +83,8 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):  # type: ignore
         min_delta_angle: int,
         min_angle: int,
         max_angle: int,
-        target_coord: int | None = None,
     ) -> int:
-        if target_coord is None:
-            target_coord = axis_length // 2
-
-        axis_delta = target_coord - centroid_coord
+        axis_delta = axis_length // 2 - centroid_coord
         if abs(axis_delta) <= min_delta_angle:
             return axis_angle
 
@@ -136,15 +120,6 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):  # type: ignore
             max_angle=self.rotator_params.max_x_angle,
         )
 
-        target_coord = (
-            self.image_size.height
-            * (
-                self.rotator_params.y_quadrant_count
-                - self.rotator_params.y_target_quadrant
-            )
-            // self.rotator_params.y_quadrant_count
-        )
-
         new_y_angle = self.get_new_angle(
             axis_angle=self.y_angle,
             axis_length=self.image_size.height,
@@ -152,7 +127,6 @@ class RotatorApp(PicamApp["RotatorApp"], ABC, Generic[T]):  # type: ignore
             min_delta_angle=self.rotator_params.min_delta_y_angle,
             min_angle=self.rotator_params.min_y_angle,
             max_angle=self.rotator_params.max_y_angle,
-            target_coord=target_coord,
         )
 
         self.servos.set_angles(

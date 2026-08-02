@@ -12,8 +12,6 @@ from hailo_apps.meta.interfaces import (
 from hailo_apps.meta.interfaces.picam_app import CAMERA_CONTROLS
 from hailo_apps.servos import ServoAngles
 
-BASE_MODEL_URL = "/usr/share/hailo-models"
-
 
 class FaceTracker(RotatorApp["FaceTracker"]):
     def __init__(
@@ -36,7 +34,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
             )
 
         super().__init__(
-            model_url=f"{BASE_MODEL_URL}/{model_name}",
+            model_url=f"{config.base_model_url}/{model_name}",
             image_size=image_size,
             init_servo_angles=init_servo_angles,
             rotator_params=rotator_params,

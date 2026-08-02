@@ -20,7 +20,7 @@ HAILO_MODEL_URLS = {
 T = TypeVar("T", bound="HailoApp")
 
 
-class HailoApp(Generic[T]):  # type: ignore
+class HailoApp(Generic[T]):
     def __init__(
         self,
         model_url: str,
