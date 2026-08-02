@@ -1,3 +1,5 @@
+from time import sleep
+
 import numpy as np
 from libcamera import Transform
 
@@ -20,6 +22,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         rotator_params: RotatorParams,
         image_size: ImageSize | None = None,
         capture_size: ImageSize | None = None,
+        final_capture_y_angle_offset: int = 0,
         # model_name: str = "scrfd_10g_h8l.hef",
         model_name: str = "scrfd_2.5g_h8l.hef",
         debug_mode: bool = False,
@@ -45,6 +48,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
 
         self.min_score = min_score
         self.capture_size = capture_size
+        self.final_capture_y_angle_offset = final_capture_y_angle_offset
 
     def get_centroid(self, np_image: np.ndarray) -> Centroid | None:
         detection = self.model(np_image)
@@ -67,6 +71,23 @@ class FaceTracker(RotatorApp["FaceTracker"]):
     def before_stop(self) -> None:
         if self.capture_size is None or self.history.maxlen == 0:
             return
+
+        final_y_angle = max(
+            self.rotator_params.min_y_angle,
+            min(
+                self.y_angle + self.final_capture_y_angle_offset,
+                self.rotator_params.max_y_angle,
+            ),
+        )
+
+        self.servos.set_angles(
+            servo_angles=ServoAngles(
+                x=self.x_angle,
+                y=final_y_angle,
+            )
+        )
+
+        sleep(0.5)
 
         capture_configuration = self.picam.create_still_configuration(
             main={
