@@ -1,4 +1,5 @@
 import select
+import shutil
 import sys
 import termios
 import tty
@@ -21,22 +22,24 @@ from hailo_apps.servos import ServoAngles
 CAPTURES_DIRECTORY = Path("./resources/captures")
 PEDAL_PIN = 16
 FINAL_CAPTURE_Y_ANGLE_OFFSET = -15
+INITIAL_SERVO_ANGLES = ServoAngles()
 CAPTURE_SIZE = ImageSize(
-    width=1080,
-    height=1920,
+    width=2048,
+    height=2048,
 )
 
 console = Console()
 
 
-def render_header() -> None:
+def render_header(message: str) -> None:
     console.print(
         Panel(
-            "[bold white]CAMERA :: HAILO :: SERVO TRACKING[/bold white]\n\n"
-            "[dim]PRESS THE PEDAL,[/dim] "
+            f"[bold white]{message}[/bold white]\n\n"
+            "[dim]PRESS THE PEDAL TO CONTINUE;[/dim] "
             "[bold bright_magenta]Q[/bold bright_magenta] "
-            "[dim]OR[/dim] [bold bright_magenta]CTRL+C[/bold bright_magenta] "
-            "[dim]TO STOP[/dim]",
+            "[dim]OR[/dim] "
+            "[bold bright_magenta]CTRL+C[/bold bright_magenta] "
+            "[dim]TO EXIT[/dim]",
             title="[bold]FACE TRACKER[/bold]",
             title_align="left",
             border_style="bright_cyan",
@@ -62,7 +65,7 @@ def terminal_input() -> Generator[None, None, None]:
         )
 
 
-def wait_for_stop(pedal: Button) -> None:
+def wait_for_pedal_or_quit(pedal: Button) -> bool:
     pedal_pressed = Event()
     pedal.when_pressed = pedal_pressed.set
 
@@ -70,44 +73,26 @@ def wait_for_stop(pedal: Button) -> None:
         while not pedal_pressed.is_set():
             readable, _, _ = select.select([sys.stdin], [], [], 0.1)
             if readable and sys.stdin.read(1).lower() == "q":
-                return
+                return False
+
+    return True
 
 
-def main() -> None:
-    if not sys.stdin.isatty():
-        raise RuntimeError("face tracker requires an interactive terminal")
+def start_tracking(face_tracker: FaceTracker) -> None:
+    face_tracker.x_angle = INITIAL_SERVO_ANGLES.x
+    face_tracker.y_angle = INITIAL_SERVO_ANGLES.y
+    face_tracker.servos.set_angles(servo_angles=INITIAL_SERVO_ANGLES)
 
-    face_tracker = FaceTracker(
-        init_servo_angles=ServoAngles(),
-        rotator_params=RotatorParams(),
-        image_size=ImageSize(
-            width=640,
-            height=640,
-        ),
-        capture_size=CAPTURE_SIZE,
-        final_capture_y_angle_offset=FINAL_CAPTURE_Y_ANGLE_OFFSET,
-        history_length=1,
-    )
-    pedal = Button(
-        pin=PEDAL_PIN,
-        hold_time=0.001,
-        bounce_time=0.001,
+    face_tracker.run()
+
+
+def stop_tracking_and_save_capture(face_tracker: FaceTracker) -> None:
+    console.print(
+        "\n[dim bright_magenta]└──>[/dim bright_magenta] "
+        "[dim white]CAPTURING IMAGE...[/dim white]"
     )
 
-    try:
-        face_tracker.run()
-        render_header()
-        wait_for_stop(pedal=pedal)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        console.print(
-            "\n[dim bright_magenta]└──>[/dim bright_magenta] "
-            "[dim white]STOPPING FACE TRACKER...[/dim white]"
-        )
-
-        face_tracker.stop()
-        pedal.close()
+    face_tracker.stop()
 
     if not face_tracker.history:
         raise RuntimeError("face tracker did not capture a final image")
@@ -120,7 +105,6 @@ def main() -> None:
             f"{image_width}x{image_height}"
         )
 
-    CAPTURES_DIRECTORY.mkdir(parents=True, exist_ok=True)
     captured_at = datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
     capture_path = CAPTURES_DIRECTORY / f"{captured_at}.jpg"
     Image.fromarray(final_image).save(capture_path)
@@ -129,6 +113,62 @@ def main() -> None:
         "[dim bright_magenta]└──>[/dim bright_magenta] "
         f"[dim white]IMAGE SAVED :: {capture_path}[/dim white]"
     )
+
+
+def reset_captures_directory() -> None:
+    if CAPTURES_DIRECTORY.exists():
+        shutil.rmtree(CAPTURES_DIRECTORY)
+
+    CAPTURES_DIRECTORY.mkdir(parents=True)
+
+
+def main() -> None:
+    if not sys.stdin.isatty():
+        raise RuntimeError("face tracker requires an interactive terminal")
+
+    face_tracker = FaceTracker(
+        init_servo_angles=INITIAL_SERVO_ANGLES,
+        rotator_params=RotatorParams(),
+        image_size=ImageSize(
+            width=640,
+            height=640,
+        ),
+        capture_size=CAPTURE_SIZE,
+        final_capture_y_angle_offset=FINAL_CAPTURE_Y_ANGLE_OFFSET,
+        history_length=1,
+    )
+
+    pedal = Button(
+        pin=PEDAL_PIN,
+        hold_time=0.001,
+        bounce_time=0.001,
+    )
+
+    tracking = False
+    reset_captures_directory()
+
+    try:
+        start_tracking(face_tracker=face_tracker)
+        tracking = True
+        render_header(message="CAMERA :: HAILO :: SERVO TRACKING")
+
+        while wait_for_pedal_or_quit(pedal=pedal):
+            if tracking:
+                stop_tracking_and_save_capture(face_tracker=face_tracker)
+                tracking = False
+                render_header(message="CAPTURED :: TRACKING PAUSED")
+                continue
+
+            start_tracking(face_tracker=face_tracker)
+            tracking = True
+            render_header(message="CAMERA :: HAILO :: SERVO TRACKING")
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if tracking:
+            stop_tracking_and_save_capture(face_tracker=face_tracker)
+
+        pedal.close()
 
 
 if __name__ == "__main__":

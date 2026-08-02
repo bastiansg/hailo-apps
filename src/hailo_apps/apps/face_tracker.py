@@ -88,7 +88,6 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         )
 
         sleep(0.5)
-
         capture_configuration = self.picam.create_still_configuration(
             main={
                 "format": config.image_format,
