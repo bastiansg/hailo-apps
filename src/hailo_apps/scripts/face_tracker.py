@@ -17,8 +17,8 @@ from hailo_apps.servos import ServoAngles
 
 CAPTURES_DIRECTORY = Path("./resources/captures")
 CAPTURE_SIZE = ImageSize(
-    width=2048,
-    height=2048,
+    width=1080,
+    height=1920,
 )
 
 console = Console()
