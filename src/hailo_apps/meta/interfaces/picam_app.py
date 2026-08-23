@@ -52,6 +52,7 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
         self.mutex = Lock()
         self.stop_event = Event()
         self.thread: Thread | None = None
+        self.thread_error: Exception | None = None
 
     def __del__(self) -> None:
         picam = getattr(self, "picam", None)
@@ -92,6 +93,7 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
             raise RuntimeError("camera is already running")
 
         self.stop_event.clear()
+        self.thread_error = None
         self.thread = Thread(target=self._run, daemon=True)
         self.thread.start()
 
@@ -111,6 +113,8 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
                     self.on_frame(np_image=np_image)  # type: ignore
 
                 self.before_stop()
+            except Exception as error:
+                self.thread_error = error
             finally:
                 self.picam.stop()
 
@@ -125,3 +129,6 @@ class PicamApp(HailoApp["PicamApp"], ABC, Generic[T]):  # type: ignore
 
         thread.join()
         self.thread = None
+
+        if self.thread_error is not None:
+            raise self.thread_error

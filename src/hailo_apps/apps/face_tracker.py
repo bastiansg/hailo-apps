@@ -41,7 +41,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         )
 
         self.min_score = min_score
-        self.capture_size = capture_size
+        self.capture_size = capture_size or image_size
         self.final_capture_y_angle_offset = final_capture_y_angle_offset
         self.final_capture: np.ndarray | None = None
 
@@ -68,9 +68,6 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         return centroid
 
     def before_stop(self) -> None:
-        if self.capture_size is None:
-            return
-
         final_y_angle = max(
             self.rotator_params.min_y_angle,
             min(
