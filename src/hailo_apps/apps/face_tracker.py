@@ -6,7 +6,6 @@ from libcamera import Transform
 from hailo_apps.config import config
 from hailo_apps.meta.interfaces import (
     Centroid,
-    HistoryItem,
     ImageSize,
     RotatorApp,
     RotatorParams,
@@ -31,11 +30,6 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         min_score: float = 0.0,
     ):
         image_size = image_size or ImageSize()
-        if capture_size is not None and history_length == 0:
-            raise ValueError(
-                "history_length must be positive when capture_size is set"
-            )
-
         super().__init__(
             model_url=f"{config.base_model_url}/{model_name}",
             image_size=image_size,
@@ -49,6 +43,11 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         self.min_score = min_score
         self.capture_size = capture_size
         self.final_capture_y_angle_offset = final_capture_y_angle_offset
+        self.final_capture: np.ndarray | None = None
+
+    def run(self) -> None:
+        self.final_capture = None
+        super().run()
 
     def get_centroid(self, np_image: np.ndarray) -> Centroid | None:
         detection = self.model(np_image)
@@ -69,7 +68,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
         return centroid
 
     def before_stop(self) -> None:
-        if self.capture_size is None or self.history.maxlen == 0:
+        if self.capture_size is None:
             return
 
         final_y_angle = max(
@@ -104,14 +103,7 @@ class FaceTracker(RotatorApp["FaceTracker"]):
             buffer_count=1,
         )
 
-        np_image = self.picam.switch_mode_and_capture_array(
+        self.final_capture = self.picam.switch_mode_and_capture_array(
             capture_configuration,
             "main",
-        )
-
-        self.history.append(
-            HistoryItem(
-                np_image=np_image,
-                centroid=self.get_centroid(np_image),
-            )
         )

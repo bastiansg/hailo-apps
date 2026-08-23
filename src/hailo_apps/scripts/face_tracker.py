@@ -94,10 +94,10 @@ def stop_tracking_and_save_capture(face_tracker: FaceTracker) -> None:
 
     face_tracker.stop()
 
-    if not face_tracker.history:
+    final_image = face_tracker.final_capture
+    if final_image is None:
         raise RuntimeError("face tracker did not capture a final image")
 
-    final_image = face_tracker.history[-1].np_image
     image_height, image_width = final_image.shape[:2]
     if image_width != CAPTURE_SIZE.width or image_height != CAPTURE_SIZE.height:
         raise RuntimeError(
